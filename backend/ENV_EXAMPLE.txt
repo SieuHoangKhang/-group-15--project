@@ -1,0 +1,19 @@
+# MongoDB Atlas Configuration
+# Thay thế các giá trị trong <> bằng thông tin thực tế từ MongoDB Atlas
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-host>/groupDB?retryWrites=true&w=majority&appName=<app-name>
+
+# Server Configuration
+PORT=3001
+
+# Development Configuration
+NODE_ENV=development
+
+# Hướng dẫn:
+# 1. Tạo tài khoản MongoDB Atlas tại https://www.mongodb.com/cloud/atlas
+# 2. Tạo cluster miễn phí
+# 3. Tạo database "groupDB" và collection "users"
+# 4. Tạo database user với quyền read/write
+# 5. Lấy connection string từ MongoDB Atlas
+# 6. Thay thế <username>, <password>, <cluster-host>, <app-name> bằng giá trị thực
+# 7. Đổi tên file này thành .env
+
