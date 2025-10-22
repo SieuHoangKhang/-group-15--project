@@ -100,6 +100,25 @@ app.post('/users', async (req, res) => {
   }
 });
 
+app.delete('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(`🗑️ Deleting user with ID: ${id}`);
+    
+    const deleted = await User.findByIdAndDelete(id);
+    if (!deleted) {
+      console.log('❌ User not found:', id);
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    console.log(`✅ User deleted successfully: ${deleted.name} (${deleted.email})`);
+    res.json({ message: 'User deleted successfully', user: deleted });
+  } catch (err) {
+    console.error('❌ Error deleting user:', err.message || err);
+    res.status(500).json({ message: 'Failed to delete user', error: err.message });
+  }
+});
+
 // Start server after DB connected
 let server;
 connectDatabase()
@@ -108,8 +127,9 @@ connectDatabase()
       console.log('🚀 Server started successfully!');
       console.log(`🌐 Server listening on port ${port}`);
       console.log('📡 API endpoints:');
-      console.log(`   GET  http://localhost:${port}/users`);
-      console.log(`   POST http://localhost:${port}/users`);
+      console.log(`   GET    http://localhost:${port}/users`);
+      console.log(`   POST   http://localhost:${port}/users`);
+      console.log(`   DELETE http://localhost:${port}/users/:id`);
       console.log('='.repeat(50));
     });
   })
