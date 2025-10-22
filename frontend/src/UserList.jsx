@@ -30,8 +30,8 @@ function UserList() {
       try {
         setLoading(true);
         setError('');
-  // Bám sát yêu cầu: axios.get("http://localhost:3000/api/users")
-  const res = await axios.get("http://localhost:3000/api/users");
+  // Gọi API backend MongoDB Atlas
+  const res = await axios.get("http://localhost:3001/users");
         setUsers(res.data);
       } catch (err) {
         const msg = err?.message || 'Network Error';
@@ -56,8 +56,8 @@ function UserList() {
     const id = confirm.id;
     if (!id) return;
     try {
-  // Đồng bộ hoá endpoint DELETE theo cùng base URL /api
-  await axios.delete(`http://localhost:3000/api/users/${id}`);
+  // Gọi API backend MongoDB Atlas để xóa user
+  await axios.delete(`http://localhost:3001/users/${id}`);
       toast.success('Đã xoá user');
       closeConfirm();
       fetchUsers();
@@ -106,7 +106,7 @@ function UserList() {
               <TableBody>
                 {users.map((user) => (
                   <TableRow
-                    key={user.id}
+                    key={user._id}
                     hover
                     sx={{
                       transition: 'background 160ms ease, transform 160ms ease',
@@ -115,13 +115,13 @@ function UserList() {
                       },
                     }}
                   >
-                    <TableCell>{user.id}</TableCell>
+                    <TableCell>{user._id}</TableCell>
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell align="right">
                       <IconButton
                         color="error"
-                        onClick={() => confirmDelete(user.id)}
+                        onClick={() => confirmDelete(user._id)}
                         className="interactive"
                         sx={{
                           transition: 'box-shadow 140ms ease, background 140ms ease',

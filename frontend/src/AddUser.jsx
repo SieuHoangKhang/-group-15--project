@@ -23,9 +23,9 @@ function AddUser() {
       return;
     }
     try {
-  // Bám sát yêu cầu: axios.post("http://localhost:3000/api/users", newUser)
+  // Gọi API backend MongoDB Atlas để tạo user
   const newUser = { name, email };
-  await axios.post("http://localhost:3000/api/users", newUser);
+  await axios.post("http://localhost:3001/users", newUser);
       toast.success("Thêm user thành công!");
       setName("");
       setEmail("");
