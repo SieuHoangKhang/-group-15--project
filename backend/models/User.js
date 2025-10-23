@@ -19,5 +19,15 @@ const UserSchema = new mongoose.Schema({
     timestamps: true // Tự động thêm trường createdAt và updatedAt
 });
 
+// Chuẩn hoá JSON trả về: dùng 'id' thay vì '_id', bỏ __v
+UserSchema.set('toJSON', {
+    virtuals: true,
+    versionKey: false,
+    transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+    }
+});
+
 // 2. Tạo Model từ Schema, liên kết với collection 'users'
 module.exports = mongoose.model('User', UserSchema);

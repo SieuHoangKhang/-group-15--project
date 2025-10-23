@@ -9,4 +9,7 @@ router.get('/users', userController.getUsers);
 // POST tạo người dùng mới
 router.post('/users', userController.createUser);
 
+// DELETE xoá người dùng theo id
+router.delete('/users/:id', userController.deleteUser);
+
 module.exports = router;
