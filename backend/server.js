@@ -28,8 +28,8 @@ const userRouter = require('./routes/user');
 app.use('/', userRouter);
 
 // Phục vụ static frontend build (một cổng duy nhất)
-// Thư mục frontend nằm tại: TH_Buoi4/frontend
-const frontendBuildPath = path.join(__dirname, '..', '..', 'frontend', 'build');
+// Thư mục frontend nằm cạnh backend: ../frontend/build
+const frontendBuildPath = path.join(__dirname, '..', 'frontend', 'build');
 app.use(express.static(frontendBuildPath));
 // Catch-all: trả về index.html cho mọi route KHÔNG bắt đầu bằng /api (Express 5 dùng regex)
 // Catch-all cho SPA (loại trừ /users nếu muốn, nhưng do route đã đặt trước nên không bắt vào /users)
