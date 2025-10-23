@@ -15,15 +15,16 @@ const inferBaseURL = () => {
   return "";
 };
 
+const BASE_URL = inferBaseURL();
 const api = axios.create({
-  baseURL: inferBaseURL(),
+  baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
 });
 
 // Log baseURL ở dev để kiểm tra đúng đích
 if (process.env.NODE_ENV !== 'production') {
   // eslint-disable-next-line no-console
-  console.debug('API baseURL:', api.defaults.baseURL || '(same-origin)');
+  console.debug('API baseURL:', BASE_URL || '(same-origin)');
 }
 
 export default api;

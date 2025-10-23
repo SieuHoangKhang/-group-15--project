@@ -9,6 +9,9 @@ router.get('/users', userController.getUsers);
 // POST tạo người dùng mới
 router.post('/users', userController.createUser);
 
+// PUT cập nhật người dùng theo id
+router.put('/users/:id', userController.updateUser);
+
 // DELETE xoá người dùng theo id
 router.delete('/users/:id', userController.deleteUser);
 
