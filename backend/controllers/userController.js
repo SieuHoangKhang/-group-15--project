@@ -47,6 +47,40 @@ exports.createUser = async (req, res) => { // Sửa thành hàm async
     }
 };
 
+// @route   PUT /users/:id
+// @desc    Cập nhật người dùng theo id
+// @access  Public
+exports.updateUser = async (req, res) => {
+    const { id } = req.params;
+    const { name, email } = req.body;
+
+    if (!name && !email) {
+        return res.status(400).json({ message: 'Cần cung cấp ít nhất một trường để cập nhật (name hoặc email).' });
+    }
+
+    try {
+        const update = {};
+        if (typeof name === 'string') update.name = name;
+        if (typeof email === 'string') update.email = email;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            id,
+            update,
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'Không tìm thấy user' });
+        }
+        return res.json(updatedUser);
+    } catch (err) {
+        if (err.code === 11000) {
+            return res.status(400).json({ message: 'Email này đã tồn tại trong hệ thống.' });
+        }
+        return res.status(400).json({ message: err.message });
+    }
+};
+
 // @route   DELETE /users/:id
 // @desc    Xoá người dùng theo id
 // @access  Public
