@@ -46,3 +46,19 @@ exports.createUser = async (req, res) => { // Sửa thành hàm async
         res.status(400).json({ message: err.message });
     }
 };
+
+// @route   DELETE /users/:id
+// @desc    Xoá người dùng theo id
+// @access  Public
+exports.deleteUser = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const deleted = await User.findByIdAndDelete(id);
+        if (!deleted) {
+            return res.status(404).json({ message: 'Không tìm thấy user' });
+        }
+        return res.json({ message: 'Đã xoá user', id });
+    } catch (err) {
+        return res.status(400).json({ message: err.message });
+    }
+};
