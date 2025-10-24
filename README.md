@@ -32,4 +32,3 @@ Dự án này là bài thực hành **Buổi 4** trong môn **Mã Nguồn Mở**
 
 ---
 
-## 🧩 Cấu trúc thư mục
