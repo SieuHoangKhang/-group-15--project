@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import api from "./api";
+import { useUsers } from "./UsersContext";
 import GlassCard from "./ui/GlassCard";
 import CardContent from "@mui/material/CardContent";
 import CardHeader from "@mui/material/CardHeader";
@@ -7,30 +7,43 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import { useToast } from "./ui/ToastProvider";
+import { useAuth } from "./auth/AuthContext";
 
 function AddUser() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const { token } = useAuth();
+  const { addUser } = useUsers();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    if (!name || !email) {
-      toast.warning("Vui lòng nhập đầy đủ tên và email");
+    // Yêu cầu đăng nhập trước khi thêm
+    if (!token) {
+      toast.warning("Vui lòng đăng nhập để thêm người dùng");
+      setLoading(false);
+      return;
+    }
+    // Validation
+    if (!name || !name.trim()) {
+      toast.warning("Tên không được để trống");
+      setLoading(false);
+      return;
+    }
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!email || !emailRegex.test(email)) {
+      toast.warning("Email không hợp lệ");
       setLoading(false);
       return;
     }
     try {
-  // Gọi API qua client chung
-  const newUser = { name, email };
-  await api.post("/users", newUser);
+      const newUser = { name: name.trim(), email: email.trim() };
+      await addUser(newUser);
       toast.success("Thêm user thành công!");
       setName("");
       setEmail("");
-  // Phát sự kiện để UserList refetch danh sách
-  window.dispatchEvent(new CustomEvent('users:refresh'));
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || "Lỗi không xác định";
       console.error("Lỗi khi thêm user:", err);
