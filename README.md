@@ -9,7 +9,7 @@
 # 🛒 Dự án Quản Lý USER (Group 15)
 
 ## 📖 Giới thiệu
-Dự án này là bài thực hành **Buổi 4** trong môn **Mã Nguồn Mở**, mục tiêu là xây dựng ứng dụng **quản lý người dùng (User Management)** với **Frontend (React)** và **Backend (Node.js + Express + MongoDB)**, áp dụng đầy đủ quy trình Git nhóm (branch, commit, push, pull request, merge).
+Dự án này là bài thực hành  trong môn **Mã Nguồn Mở**, mục tiêu là xây dựng ứng dụng **quản lý người dùng (User Management)** với **Frontend (React)** và **Backend (Node.js + Express + MongoDB)**, áp dụng đầy đủ quy trình Git nhóm (branch, commit, push, pull request, merge).
 
 ---
 
