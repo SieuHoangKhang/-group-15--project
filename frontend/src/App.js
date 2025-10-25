@@ -5,10 +5,17 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 // import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
+// Dùng Grid v2 (Material UI v7): import từ @mui/material/Grid2
 import UserList from "./UserList";
 import AddUser from "./AddUser";
 import { ToastProvider } from "./ui/ToastProvider";
+import { AuthProvider, useAuth } from "./auth/AuthContext";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import LoginForm from "./auth/LoginForm";
+import SignupForm from "./auth/SignupForm";
+import ProfileForm from "./auth/ProfileForm";
+import { UsersProvider } from "./UsersContext";
 
 const theme = createTheme({
   palette: {
@@ -26,11 +33,41 @@ const theme = createTheme({
   shape: { borderRadius: 16 },
 });
 
+function HeaderAuth() {
+  const { user, logout } = useAuth();
+  const [openLogin, setOpenLogin] = React.useState(false);
+  const [openSignup, setOpenSignup] = React.useState(false);
+  const [openProfile, setOpenProfile] = React.useState(false);
+
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 2 }}>
+      {user ? (
+        <>
+          <Typography variant="body1" sx={{ mr: 1 }}>Xin chào, {user.name}</Typography>
+          <Button size="small" variant="outlined" onClick={() => setOpenProfile(true)}>Hồ sơ</Button>
+          <Button size="small" variant="outlined" onClick={logout}>Đăng xuất</Button>
+        </>
+      ) : (
+        <>
+          <Button size="small" variant="outlined" onClick={() => setOpenLogin(true)}>Đăng nhập</Button>
+          <Button size="small" variant="contained" onClick={() => setOpenSignup(true)}>Đăng ký</Button>
+        </>
+      )}
+      <LoginForm open={openLogin} onClose={() => setOpenLogin(false)} />
+      <SignupForm open={openSignup} onClose={() => setOpenSignup(false)} />
+      {/* Profile dialog (only when logged in) */}
+      {user && <React.Suspense fallback={null}><ProfileForm open={openProfile} onClose={() => setOpenProfile(false)} /></React.Suspense>}
+    </Box>
+  );
+}
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <ToastProvider>
+      <AuthProvider>
+      <UsersProvider>
       <GlobalStyles
         styles={{
           html: {
@@ -74,20 +111,29 @@ function App() {
         }}
       />
       <Container maxWidth="lg">
+        <HeaderAuth />
         <Typography variant="h4" align="left" sx={{ fontWeight: 800, mt: 5, mb: 3 }}>
           Quản lý User
         </Typography>
-  <Grid container spacing={3} alignItems="flex-start" sx={{ mb: 6, flexWrap: 'nowrap' }}>
-          {/* Bên trái: Form thêm User */}
-          <Grid item xs={5} sm={5} md={5}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', md: '5fr 7fr' },
+            gap: 3,
+            alignItems: 'flex-start',
+            mb: 6,
+          }}
+        >
+          <Box>
             <AddUser />
-          </Grid>
-          {/* Bên phải: Danh sách User */}
-          <Grid item xs={7} sm={7} md={7}>
+          </Box>
+          <Box>
             <UserList />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
+      </UsersProvider>
+      </AuthProvider>
       </ToastProvider>
     </ThemeProvider>
   );
