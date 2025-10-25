@@ -14,6 +14,12 @@ const UserSchema = new mongoose.Schema({
         unique: true, // Đảm bảo email không bị trùng lặp (tức là chỉ có 1 email duy nhất trong database)
         trim: true,
         lowercase: true // Lưu email dưới dạng chữ thường
+    },
+    // Mật khẩu (được lưu dưới dạng hash). Đặt select:false để mặc định không trả về khi query
+    password: {
+        type: String,
+        minlength: 6,
+        select: false,
     }
 }, {
     timestamps: true // Tự động thêm trường createdAt và updatedAt
