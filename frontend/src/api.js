@@ -16,8 +16,15 @@ const inferBaseURL = () => {
 };
 
 const BASE_URL = inferBaseURL();
+ backend-admin
 const api = axios.create({
   baseURL: BASE_URL,
+
+// Use /api prefix so frontend calls go to backend API namespace and avoid SPA catch-all
+const API_BASE = BASE_URL ? (BASE_URL.replace(/\/$/, '') + '/api') : '/api';
+const api = axios.create({
+  baseURL: API_BASE,
+ main
   headers: { "Content-Type": "application/json" },
 });
 
@@ -26,5 +33,17 @@ if (process.env.NODE_ENV !== 'production') {
   // eslint-disable-next-line no-console
   console.debug('API baseURL:', BASE_URL || '(same-origin)');
 }
+
+// Đính kèm Authorization header nếu có token lưu trong localStorage
+api.interceptors.request.use((config) => {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (_) { /* ignore */ }
+  return config;
+});
 
 export default api;

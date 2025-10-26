@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from "react";
-import api from "./api";
+import React, { useEffect, useState } from "react";
+import { useUsers } from "./UsersContext";
 import GlassCard from "./ui/GlassCard";
 import CardContent from "@mui/material/CardContent";
 import CardHeader from "@mui/material/CardHeader";
@@ -22,31 +22,12 @@ import TextField from "@mui/material/TextField";
 import EditIcon from "@mui/icons-material/Edit";
 
 function UserList() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { users, loading, error, fetchUsers, updateUser, deleteUser } = useUsers();
   const [confirm, setConfirm] = useState({ open: false, id: null });
   const [edit, setEdit] = useState({ open: false, id: null, name: "", email: "" });
   const toast = useToast();
 
-  const fetchUsers = useCallback(async () => {
-      try {
-        setLoading(true);
-        setError('');
-  // Gọi API qua client chung, endpoint tương đối '/users'
-  const res = await api.get("/users");
-        setUsers(res.data);
-      } catch (err) {
-        const msg = err?.message || 'Network Error';
-        setError(msg);
-        toast.error(`Không thể tải danh sách: ${msg}`);
-      } finally {
-        setLoading(false);
-      }
-    }, [toast]);
-
   useEffect(() => {
-    fetchUsers();
     const handler = () => fetchUsers();
     window.addEventListener('users:refresh', handler);
     return () => window.removeEventListener('users:refresh', handler);
@@ -59,11 +40,9 @@ function UserList() {
     const id = confirm.id;
     if (!id) return;
     try {
-  // Xoá user theo id
-  await api.delete(`/users/${id}`);
+      await deleteUser(id);
       toast.success('Đã xoá user');
       closeConfirm();
-      fetchUsers();
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || 'Lỗi xoá user';
       toast.error(msg);
@@ -81,10 +60,16 @@ function UserList() {
       return;
     }
     try {
+ backend-admin
       await api.put(`/users/${edit.id}`, { name: edit.name, email: edit.email });
       toast.success('Cập nhật user thành công');
       closeEdit();
       fetchUsers();
+
+      await updateUser(edit.id, { name: edit.name, email: edit.email });
+      toast.success('Cập nhật user thành công');
+      closeEdit();
+ main
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || 'Lỗi cập nhật user';
       toast.error(msg);

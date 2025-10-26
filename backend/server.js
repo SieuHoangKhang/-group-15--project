@@ -24,8 +24,11 @@ app.use(cors({
 
 // Import routes
 const userRouter = require('./routes/user');
-// Theo yêu cầu bài: endpoint là /users (không có prefix /api)
-app.use('/', userRouter);
+const authRouter = require('./routes/auth');
+// Mount API routers under /api to avoid SPA/static catch-all conflicts
+app.use('/api', userRouter);
+// Auth endpoints
+app.use('/api', authRouter);
 
 // Phục vụ static frontend build (một cổng duy nhất)
 // Thư mục frontend nằm cạnh backend: ../frontend/build
