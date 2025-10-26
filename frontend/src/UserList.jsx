@@ -18,12 +18,15 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import { useToast } from "./ui/ToastProvider";
+import TextField from "@mui/material/TextField";
+import EditIcon from "@mui/icons-material/Edit";
 
 function UserList() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirm, setConfirm] = useState({ open: false, id: null });
+  const [edit, setEdit] = useState({ open: false, id: null, name: "", email: "" });
   const toast = useToast();
 
   const fetchUsers = useCallback(async () => {
@@ -63,6 +66,27 @@ function UserList() {
       fetchUsers();
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || 'Lỗi xoá user';
+      toast.error(msg);
+    }
+  };
+
+  const openEdit = (user) => {
+    setEdit({ open: true, id: user.id, name: user.name, email: user.email });
+  };
+  const closeEdit = () => setEdit({ open: false, id: null, name: "", email: "" });
+  const handleUpdate = async () => {
+    if (!edit.id) return;
+    if (!edit.name || !edit.email) {
+      toast.warning('Vui lòng nhập đầy đủ tên và email');
+      return;
+    }
+    try {
+      await api.put(`/users/${edit.id}`, { name: edit.name, email: edit.email });
+      toast.success('Cập nhật user thành công');
+      closeEdit();
+      fetchUsers();
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || 'Lỗi cập nhật user';
       toast.error(msg);
     }
   };
@@ -133,6 +157,18 @@ function UserList() {
                       >
                         <DeleteIcon />
                       </IconButton>
+                      <IconButton
+                        color="primary"
+                        onClick={() => openEdit(user)}
+                        className="interactive"
+                        sx={{ ml: 1,
+                          transition: 'box-shadow 140ms ease, background 140ms ease',
+                          '&:hover': { boxShadow: '0 6px 16px rgba(110,168,254,0.25)' },
+                          '&:active': { boxShadow: '0 4px 12px rgba(110,168,254,0.2)' },
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -149,6 +185,31 @@ function UserList() {
           <Button color="error" variant="contained" onClick={handleDelete}>Xoá</Button>
         </DialogActions>
       </Dialog>
+
+        <Dialog open={edit.open} onClose={closeEdit} fullWidth maxWidth="sm">
+          <DialogTitle>Sửa thông tin user</DialogTitle>
+          <DialogContent sx={{ pt: 1 }}>
+            <TextField
+              margin="dense"
+              label="Tên"
+              fullWidth
+              value={edit.name}
+              onChange={(e) => setEdit((s) => ({ ...s, name: e.target.value }))}
+            />
+            <TextField
+              margin="dense"
+              label="Email"
+              type="email"
+              fullWidth
+              value={edit.email}
+              onChange={(e) => setEdit((s) => ({ ...s, email: e.target.value }))}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={closeEdit}>Huỷ</Button>
+            <Button onClick={handleUpdate} variant="contained">Lưu</Button>
+          </DialogActions>
+        </Dialog>
     </GlassCard>
   );
 }
