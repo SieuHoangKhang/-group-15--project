@@ -8,7 +8,7 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 // Đăng ký
 exports.signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body || {};
+    const { name, email, password, phone, address } = req.body || {};
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Vui lòng nhập đủ name, email, password.' });
     }
@@ -21,10 +21,10 @@ exports.signup = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
-    const user = await User.create({ name, email, password: hash });
-    // Không trả password
-    const { id } = user.toJSON();
-    return res.status(201).json({ id, name: user.name, email: user.email });
+  const user = await User.create({ name, email, password: hash, phone: phone || null, address: address || null });
+  // Không trả password
+  const { id, phone: p, address: a } = user.toJSON();
+  return res.status(201).json({ id, name: user.name, email: user.email, phone: p, address: a });
   } catch (err) {
     console.error('Signup error:', err);
     if (err?.code === 11000) {
@@ -53,7 +53,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
     return res.json({
       token,
-      user: { id: user.id, name: user.name, email: user.email }
+      user: { id: user.id, name: user.name, email: user.email, role: user.role || 'user', phone: user.phone || null, address: user.address || null }
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -73,8 +73,8 @@ exports.me = async (req, res) => {
     if (!sub) return res.status(401).json({ message: 'Thiếu thông tin người dùng trong token' });
     const user = await User.findById(sub);
     if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng' });
-    const { id, name, email } = user.toJSON();
-    return res.json({ id, name, email });
+  const { id, name, email, phone, address } = user.toJSON();
+  return res.json({ id, name, email, phone, address });
   } catch (err) {
     console.error('Me error:', err);
     return res.status(500).json({ message: 'Lỗi máy chủ' });

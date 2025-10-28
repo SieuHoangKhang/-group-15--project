@@ -21,6 +21,25 @@ const UserSchema = new mongoose.Schema({
         minlength: 6,
         select: false,
     }
+    ,
+    // Số điện thoại (tuỳ chọn)
+    phone: {
+        type: String,
+        trim: true,
+        default: null,
+    },
+    // Địa chỉ (tuỳ chọn)
+    address: {
+        type: String,
+        trim: true,
+        default: null,
+    },
+    // role for RBAC: 'user' (default) or 'admin'
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    }
 }, {
     timestamps: true // Tự động thêm trường createdAt và updatedAt
 });
