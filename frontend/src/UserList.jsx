@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useUsers } from "./UsersContext";
+import { useAuth } from "./auth/AuthContext";
 import GlassCard from "./ui/GlassCard";
 import CardContent from "@mui/material/CardContent";
 import CardHeader from "@mui/material/CardHeader";
@@ -23,6 +24,7 @@ import EditIcon from "@mui/icons-material/Edit";
 
 function UserList() {
   const { users, loading, error, fetchUsers, updateUser, deleteUser } = useUsers();
+  const { user: authUser } = useAuth();
   const [confirm, setConfirm] = useState({ open: false, id: null });
   const [edit, setEdit] = useState({ open: false, id: null, name: "", email: "" });
   const toast = useToast();
@@ -121,32 +123,47 @@ function UserList() {
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell align="right">
-                      <IconButton
-                        color="error"
-                        onClick={() => confirmDelete(user.id)}
-                        className="interactive"
-                        sx={{
-                          transition: 'box-shadow 140ms ease, background 140ms ease',
-                          '&:hover': {
-                            boxShadow: '0 6px 16px rgba(255,0,0,0.25)',
-                          },
-                          '&:active': { boxShadow: '0 4px 12px rgba(255,0,0,0.2)' },
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                      <IconButton
-                        color="primary"
-                        onClick={() => openEdit(user)}
-                        className="interactive"
-                        sx={{ ml: 1,
-                          transition: 'box-shadow 140ms ease, background 140ms ease',
-                          '&:hover': { boxShadow: '0 6px 16px rgba(110,168,254,0.25)' },
-                          '&:active': { boxShadow: '0 4px 12px rgba(110,168,254,0.2)' },
-                        }}
-                      >
-                        <EditIcon />
-                      </IconButton>
+                      {(() => {
+                        // Quyền hiển thị nút: admin hiển thị cho tất cả; user chỉ cho phép sửa/xóa chính họ
+                        const isAdmin = !!authUser && String(authUser.role || '').toLowerCase() === 'admin';
+                        const isSelf = !!authUser && (authUser.id === user.id || authUser.id === user._id || authUser.sub === user.id);
+                        const showDelete = isAdmin || isSelf;
+                        const showEdit = isAdmin || isSelf;
+                        return (
+                          <>
+                            {showDelete && (
+                              <IconButton
+                                color="error"
+                                onClick={() => confirmDelete(user.id)}
+                                className="interactive"
+                                sx={{
+                                  transition: 'box-shadow 140ms ease, background 140ms ease',
+                                  '&:hover': {
+                                    boxShadow: '0 6px 16px rgba(255,0,0,0.25)',
+                                  },
+                                  '&:active': { boxShadow: '0 4px 12px rgba(255,0,0,0.2)' },
+                                }}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            )}
+                            {showEdit && (
+                              <IconButton
+                                color="primary"
+                                onClick={() => openEdit(user)}
+                                className="interactive"
+                                sx={{ ml: 1,
+                                  transition: 'box-shadow 140ms ease, background 140ms ease',
+                                  '&:hover': { boxShadow: '0 6px 16px rgba(110,168,254,0.25)' },
+                                  '&:active': { boxShadow: '0 4px 12px rgba(110,168,254,0.2)' },
+                                }}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                            )}
+                          </>
+                        );
+                      })()}
                     </TableCell>
                   </TableRow>
                 ))}
