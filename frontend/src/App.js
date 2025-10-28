@@ -12,9 +12,9 @@ import { ToastProvider } from "./ui/ToastProvider";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import LoginForm from "./auth/LoginForm";
-import SignupForm from "./auth/SignupForm";
 import ProfileForm from "./auth/ProfileForm";
+import LoginPage from "./auth/LoginPage";
+import SignupPage from "./auth/SignupPage";
 import { UsersProvider } from "./UsersContext";
 
 const theme = createTheme({
@@ -35,8 +35,6 @@ const theme = createTheme({
 
 function HeaderAuth() {
   const { user, logout } = useAuth();
-  const [openLogin, setOpenLogin] = React.useState(false);
-  const [openSignup, setOpenSignup] = React.useState(false);
   const [openProfile, setOpenProfile] = React.useState(false);
 
   return (
@@ -48,16 +46,56 @@ function HeaderAuth() {
           <Button size="small" variant="outlined" onClick={logout}>Đăng xuất</Button>
         </>
       ) : (
-        <>
-          <Button size="small" variant="outlined" onClick={() => setOpenLogin(true)}>Đăng nhập</Button>
-          <Button size="small" variant="contained" onClick={() => setOpenSignup(true)}>Đăng ký</Button>
-        </>
+        null
       )}
-      <LoginForm open={openLogin} onClose={() => setOpenLogin(false)} />
-      <SignupForm open={openSignup} onClose={() => setOpenSignup(false)} />
       {/* Profile dialog (only when logged in) */}
       {user && <React.Suspense fallback={null}><ProfileForm open={openProfile} onClose={() => setOpenProfile(false)} /></React.Suspense>}
     </Box>
+  );
+}
+
+function AdminArea() {
+  const { user } = useAuth();
+  if (!user) return <Typography variant="body1" color="text.secondary">Vui lòng đăng nhập để xem trang quản trị.</Typography>;
+  // Accept role checks case-insensitively to avoid issues with 'Admin' vs 'admin'
+  if (String(user.role || '').toLowerCase() !== 'admin') return <Typography variant="body1" color="error">Bạn không có quyền truy cập trang quản trị.</Typography>;
+  return <UserList />;
+}
+
+function AuthContent() {
+  const { user } = useAuth();
+  const [authMode, setAuthMode] = React.useState('login'); // 'login' | 'signup'
+
+  // If not authenticated, show a full-screen login or signup page
+  if (!user) {
+    if (authMode === 'login') return <LoginPage onSwitchToSignup={() => setAuthMode('signup')} />;
+    return <SignupPage onSwitchToLogin={() => setAuthMode('login')} />;
+  }
+
+  // Authenticated: show normal app content
+  return (
+    <>
+      <HeaderAuth />
+      <Typography variant="h4" align="left" sx={{ fontWeight: 800, mt: 5, mb: 3 }}>
+        Quản lý User
+      </Typography>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: '5fr 7fr' },
+          gap: 3,
+          alignItems: 'flex-start',
+          mb: 6,
+        }}
+      >
+        <Box>
+          <AddUser />
+        </Box>
+        <Box>
+          <AdminArea />
+        </Box>
+      </Box>
+    </>
   );
 }
 
@@ -111,26 +149,7 @@ function App() {
         }}
       />
       <Container maxWidth="lg">
-        <HeaderAuth />
-        <Typography variant="h4" align="left" sx={{ fontWeight: 800, mt: 5, mb: 3 }}>
-          Quản lý User
-        </Typography>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: '5fr 7fr' },
-            gap: 3,
-            alignItems: 'flex-start',
-            mb: 6,
-          }}
-        >
-          <Box>
-            <AddUser />
-          </Box>
-          <Box>
-            <UserList />
-          </Box>
-        </Box>
+        <AuthContent />
       </Container>
       </UsersProvider>
       </AuthProvider>

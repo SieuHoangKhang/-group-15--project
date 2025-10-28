@@ -16,6 +16,8 @@ function AddUser() {
   const toast = useToast();
   const { token } = useAuth();
   const { addUser } = useUsers();
+  const { user } = useAuth();
+  const isAdmin = !!user && String(user.role || '').toLowerCase() === 'admin';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,6 +54,20 @@ function AddUser() {
       setLoading(false);
     }
   };
+
+  if (!isAdmin) {
+    return (
+      <GlassCard>
+        <CardHeader title="Thêm người dùng" />
+        <CardContent sx={{ pt: 0 }}>
+          <div style={{ padding: 8 }}>
+            <p style={{ color: 'rgba(255,255,255,0.8)', margin: 0 }}>Bạn không có quyền thêm người dùng.</p>
+            <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: 8, fontSize: 13 }}>Chỉ tài khoản Admin mới có thể tạo người dùng mới.</p>
+          </div>
+        </CardContent>
+      </GlassCard>
+    );
+  }
 
   return (
     <GlassCard>

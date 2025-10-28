@@ -10,12 +10,18 @@ export function UsersProvider({ children }) {
 
   const fetchUsers = useCallback(async () => {
     try {
+      // Only attempt to fetch users if we have a token stored (avoid 401 noise)
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) {
+        setUsers([]);
+        return;
+      }
       setLoading(true);
       setError('');
       const res = await api.get('/users');
       setUsers(res.data || []);
     } catch (err) {
-      setError(err?.message || 'Network Error');
+      setError(err?.response?.data?.message || err?.message || 'Network Error');
     } finally {
       setLoading(false);
     }
@@ -42,6 +48,10 @@ export function UsersProvider({ children }) {
 
   useEffect(() => {
     fetchUsers();
+    // Listen for auth login events so we refetch when a user logs in (useful for admin)
+    const onAuthLogin = () => fetchUsers();
+    window.addEventListener('auth:login', onAuthLogin);
+    return () => window.removeEventListener('auth:login', onAuthLogin);
   }, [fetchUsers]);
 
   return (
