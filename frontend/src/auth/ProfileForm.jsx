@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField, Avatar, Box } from '@mui/material';
 import { useAuth } from './AuthContext';
 import { useToast } from '../ui/ToastProvider';
 
@@ -10,6 +10,8 @@ export default function ProfileForm({ open, onClose }) {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [avatarPreview, setAvatarPreview] = useState('');
+  const { uploadAvatar } = useAuth();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -18,13 +20,37 @@ export default function ProfileForm({ open, onClose }) {
       setEmail(user.email || '');
       setPhone(user.phone || '');
       setAddress(user.address || '');
+      setAvatarPreview(user.avatarUrl || '');
     } else {
       setName('');
       setEmail('');
       setPhone('');
       setAddress('');
+      setAvatarPreview('');
     }
   }, [user, open]);
+
+  const handleFile = (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAvatarPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUploadAvatar = async () => {
+    if (!avatarPreview) return toast.warning('Chọn ảnh trước khi tải lên');
+    try {
+      setLoading(true);
+      await uploadAvatar(avatarPreview);
+      toast.success('Ảnh đại diện đã được cập nhật');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Upload thất bại');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -46,6 +72,19 @@ export default function ProfileForm({ open, onClose }) {
       <DialogTitle>Hồ sơ của bạn</DialogTitle>
       <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <Avatar src={avatarPreview || ''} sx={{ width: 64, height: 64 }} />
+            <div>
+              <input
+                id="avatar-file"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFile(e.target.files[0])}
+                style={{ display: 'block', marginBottom: 8 }}
+              />
+              <Button size="small" variant="outlined" onClick={handleUploadAvatar} disabled={loading}>Tải lên ảnh</Button>
+            </div>
+          </Box>
           <TextField label="Họ tên" value={name} onChange={(e) => setName(e.target.value)} fullWidth />
           <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
           <TextField label="Số điện thoại" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />

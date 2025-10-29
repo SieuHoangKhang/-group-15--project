@@ -5,9 +5,16 @@ const path = require('path');
 const app = express();
 const mongoose = require('mongoose'); // THÊM: Mongoose để kết nối MongoDB
 require('dotenv').config();
+// Debug: print whether CLOUDINARY_URL is present at process start
+console.log('DEBUG process.env.CLOUDINARY_URL present:', !!process.env.CLOUDINARY_URL);
+if (process.env.CLOUDINARY_URL) {
+  try { console.log('DEBUG CLOUDINARY_URL (start):', process.env.CLOUDINARY_URL.slice(0, 60) + (process.env.CLOUDINARY_URL.length > 60 ? '...' : '')) } catch (e) {}
+}
 
 // --- Middleware & Cấu hình ---
-app.use(express.json());
+// Tăng giới hạn body parser để chấp nhận dataURL lớn khi upload ảnh (ví dụ avatar)
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 // Cho phép CORS từ localhost/127.0.0.1 trên mọi cổng (phục vụ dev)
 app.use(cors({
   origin: (origin, callback) => {
@@ -25,10 +32,16 @@ app.use(cors({
 // Import routes
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
+const debugRouter = require('./routes/debug');
 // Mount API routers under /api to avoid SPA/static catch-all conflicts
 app.use('/api', userRouter);
 // Auth endpoints
 app.use('/api', authRouter);
+// Debug endpoints (safe diagnostics)
+app.use('/api', debugRouter);
+
+// Serve uploaded files (avatars)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Phục vụ static frontend build (một cổng duy nhất)
 // Thư mục frontend nằm cạnh backend: ../frontend/build

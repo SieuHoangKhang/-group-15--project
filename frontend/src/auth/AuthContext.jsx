@@ -47,11 +47,26 @@ export function AuthProvider({ children }) {
     const res = await api.put('/auth/profile', { name, email, phone, address });
     const updated = res.data;
     // update local user copy
-    saveAuth(token, updated);
+    // merge with existing user to avoid dropping fields like `role` that the profile endpoint may not return
+    const merged = Object.assign({}, user || {}, updated);
+    saveAuth(token, merged);
     return updated;
-  }, [saveAuth, token]);
+  }, [saveAuth, token, user]);
 
-  const value = useMemo(() => ({ token, user, signup, login, logout, updateProfile }), [token, user, signup, login, logout, updateProfile]);
+  const uploadAvatar = useCallback(async (imageDataUrl) => {
+    const res = await api.post('/auth/upload-avatar', { image: imageDataUrl });
+    const { avatarUrl } = res.data || {};
+    // fetch updated profile
+    const me = await api.get('/auth/me');
+    const updated = me.data;
+    // merge with existing user to preserve fields like `role` that /auth/me may not include
+    const merged = Object.assign({}, user || {}, updated);
+    saveAuth(token, merged);
+    return { avatarUrl, updated };
+  }, [saveAuth, token, user]);
+
+  // Export uploadAvatar so components (ProfileForm) can call it
+  const value = useMemo(() => ({ token, user, signup, login, logout, updateProfile, uploadAvatar }), [token, user, signup, login, logout, updateProfile, uploadAvatar]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

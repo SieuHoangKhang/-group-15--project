@@ -1,0 +1,64 @@
+{
+  "info": {
+    "name": "Activity 3 - User Management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Signup (create user)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"user@example.com\",\n  \"password\": \"pass123\"\n}"
+        },
+        "url": { "raw": "http://localhost:3000/api/auth/signup", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","signup"] }
+      }
+    },
+    {
+      "name": "Login (get token)",
+      "request": {
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"adminpass\"\n}" },
+        "url": { "raw": "http://localhost:3000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","auth","login"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Lưu token và user id vào environment",
+              "try {",
+              "  var data = pm.response.json();",
+              "  if (data.token) pm.environment.set('token', data.token);",
+              "  if (data.user && data.user.id) pm.environment.set('userId', data.user.id);",
+              "  else if (data.id) pm.environment.set('userId', data.id);",
+              "} catch (e) { pm.test('no-json', function() { pm.expect(false).to.be.true; }); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get users (admin)",
+      "request": {
+        "method": "GET",
+        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+        "url": { "raw": "http://localhost:3000/api/users", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","users"] }
+      }
+    },
+    {
+      "name": "Delete user (by id)",
+      "request": {
+        "method": "DELETE",
+        "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+        "url": { "raw": "http://localhost:3000/api/users/:id", "protocol": "http", "host": ["localhost"], "port": "3000", "path": ["api","users",":id"] }
+      }
+    }
+  ]
+}

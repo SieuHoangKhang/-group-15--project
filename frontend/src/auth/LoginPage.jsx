@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Paper, Typography, Stack, TextField, Button, Divider } from '@mui/material';
 import { useAuth } from './AuthContext';
+import ForgotPasswordDialog from './ForgotPasswordDialog';
+import ResetPasswordDialog from './ResetPasswordDialog';
 import { useToast } from '../ui/ToastProvider';
 
 export default function LoginPage() {
@@ -9,6 +11,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [openForgot, setOpenForgot] = useState(false);
+  const [openReset, setOpenReset] = useState(false);
   // receive optional onSwitchToSignup via props; default to no-op
   // but to keep backward compat we'll accept prop if provided
   // when used inside App.AuthContent we'll pass a callback
@@ -51,8 +55,12 @@ export default function LoginPage() {
             <Button type="submit" variant="contained" disabled={loading} fullWidth>Đăng nhập</Button>
             <Divider />
             <Button variant="outlined" onClick={() => onSwitchToSignup ? onSwitchToSignup() : null} fullWidth>Đăng ký</Button>
+            <Button variant="text" onClick={() => setOpenForgot(true)} fullWidth>Quên mật khẩu</Button>
+            <Button variant="text" onClick={() => setOpenReset(true)} fullWidth>Đổi mật khẩu bằng token</Button>
           </Stack>
         </Box>
+        <ForgotPasswordDialog open={openForgot} onClose={() => setOpenForgot(false)} />
+        <ResetPasswordDialog open={openReset} onClose={() => setOpenReset(false)} />
         
       </Paper>
     </Box>
