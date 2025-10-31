@@ -16,7 +16,8 @@ module.exports = async function auth(req, res, next) {
     // fetch user to get current role (avoid trusting role inside token)
     const user = await User.findById(sub).lean();
     if (!user) return res.status(401).json({ message: 'Không tìm thấy người dùng' });
-    req.user = { sub, email, role: user.role || 'user' };
+    // Normalize role to lowercase to avoid case-sensitivity issues
+    req.user = { sub, email, role: String(user.role || 'user').toLowerCase() };
     return next();
   } catch (err) {
     return res.status(401).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });

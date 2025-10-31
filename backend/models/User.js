@@ -34,6 +34,22 @@ const UserSchema = new mongoose.Schema({
         trim: true,
         default: null,
     },
+    // Avatar URL
+    avatarUrl: {
+        type: String,
+        default: null,
+    },
+    // Reset password token and expiry
+    resetToken: {
+        type: String,
+        default: null,
+        select: false,
+    },
+    // New name for expiry field used by controllers: resetTokenExpire
+    resetTokenExpire: {
+        type: Date,
+        default: null,
+    },
     // role for RBAC: 'user' (default) or 'admin'
     role: {
         type: String,
