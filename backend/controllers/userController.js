@@ -5,7 +5,12 @@ const User = require('../models/User'); // THAY THẾ: Import User Model (đã t
 // @access  Public
 exports.getUsers = async (req, res) => { // Sửa thành hàm async
     try {
-    const { q, email, auth } = req.query || {};
+        const { q, email, auth } = req.query || {};
+        // Diagnostic log: who is requesting the list (helps debug 401/403 issues)
+        try {
+            const requester = req.user || {};
+            console.log('DEBUG getUsers requested by:', { sub: requester.sub, role: requester.role });
+        } catch (e) { /* ignore logging errors */ }
     let filter = {};
 
         if (typeof email === 'string' && email.trim()) {
@@ -20,8 +25,22 @@ exports.getUsers = async (req, res) => { // Sửa thành hàm async
             filter.password = { $exists: true, $ne: null };
         }
 
-        const users = await User.find(filter); // DÙNG MONGODB: Lấy theo filter (hoặc tất cả)
-        res.json(users);
+        // Project only safe fields to avoid leaking sensitive data (password, tokens, etc.)
+        const users = await User.find(filter)
+            .select('name email role phone address avatarUrl')
+            .lean(); // .lean() returns plain objects
+
+        // Add an `id` property for frontend convenience and return
+        const safeUsers = users.map(u => ({
+            id: u._id?.toString?.() || u.id || null,
+            name: u.name,
+            email: u.email,
+            role: u.role,
+            phone: u.phone || null,
+            address: u.address || null,
+            avatarUrl: u.avatarUrl || null,
+        }));
+        res.json(safeUsers);
     } catch (err) {
         // Ghi lại lỗi và trả về lỗi server 500 nếu có vấn đề khi truy vấn
         console.error(err.message);
@@ -80,10 +99,17 @@ exports.updateUser = async (req, res) => {
         if (typeof name === 'string') update.name = name;
         if (typeof email === 'string') update.email = email;
 
+        // Authorization: only admin or the owner (self) can update a user's data
+        const requester = req.user || {};
+        const isAdmin = String(requester.role || '').toLowerCase() === 'admin';
+        const isSelf = requester.sub === id;
+        if (!isAdmin && !isSelf) {
+            return res.status(403).json({ message: 'Bạn không có quyền cập nhật tài khoản này' });
+        }
+
         // Allow role change only if requester is admin
         if (typeof req.body.role === 'string') {
-            const requester = req.user || {};
-            if (requester.role !== 'admin') {
+            if (!isAdmin) {
                 return res.status(403).json({ message: 'Bạn không có quyền thay đổi role' });
             }
             if (['user','admin'].includes(req.body.role)) update.role = req.body.role;
@@ -115,7 +141,7 @@ exports.deleteUser = async (req, res) => {
     try {
         // Authorization: allow if requester is admin or deleting their own account
         const requester = req.user || {};
-        const isAdmin = requester.role === 'admin';
+        const isAdmin = String(requester.role || '').toLowerCase() === 'admin';
         const isSelf = requester.sub === id;
         if (!isAdmin && !isSelf) {
             return res.status(403).json({ message: 'Bạn không có quyền xoá tài khoản này' });

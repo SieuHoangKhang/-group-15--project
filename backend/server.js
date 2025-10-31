@@ -17,14 +17,24 @@ if (process.env.CLOUDINARY_URL) {
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
-// Cho phép CORS từ localhost/127.0.0.1 trên mọi cổng (phục vụ dev)
+// Cấu hình CORS
 app.use(cors({
   origin: (origin, callback) => {
-    // Cho phép request không có origin (curl, Postman)
+    // Lấy URL frontend từ biến môi trường
+    const deployedFrontendUrl = process.env.FRONTEND_URL;
+
+    // Regex cho phép localhost/127.0.0.1 trên mọi cổng
+    const localRegex = /^http:\/\/(localhost|127\.0.0.1)(:\d+)?$/i;
+
+    // Cho phép request không có origin (Postman, curl, etc.)
     if (!origin) return callback(null, true);
-    const allow = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
-    if (allow) return callback(null, true);
-    // Nếu bạn đang debug lỗi CORS, bạn có thể tạm thời comment dòng dưới
+
+    // Kiểm tra xem origin có phải là Vercel URL HOẶC là localhost
+    if (origin === deployedFrontendUrl || localRegex.test(origin)) {
+      return callback(null, true);
+    }
+    
+    // Nếu không khớp, từ chối
     return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
