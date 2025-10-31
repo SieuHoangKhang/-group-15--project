@@ -4,14 +4,13 @@ import { useAuth } from './AuthContext';
 import { useToast } from '../ui/ToastProvider';
 
 export default function ProfileForm({ open, onClose }) {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, uploadAvatar } = useAuth();
   const toast = useToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [avatarPreview, setAvatarPreview] = useState('');
-  const { uploadAvatar } = useAuth();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -54,10 +53,10 @@ export default function ProfileForm({ open, onClose }) {
 
   const handleSave = async () => {
     try {
-    setLoading(true);
-    if (!name.trim()) return toast.warning('Vui lòng nhập tên');
-    if (!/\S+@\S+\.\S+/.test(email)) return toast.warning('Email không hợp lệ');
-    await updateProfile({ name: name.trim(), email: email.trim().toLowerCase(), phone: phone.trim() || null, address: address.trim() || null });
+      setLoading(true);
+      if (!name.trim()) return toast.warning('Vui lòng nhập tên');
+      if (!/\S+@\S+\.\S+/.test(email)) return toast.warning('Email không hợp lệ');
+      await updateProfile({ name: name.trim(), email: email.trim().toLowerCase(), phone: phone.trim() || null, address: address.trim() || null });
       toast.success('Cập nhật thành công');
       onClose?.();
     } catch (err) {

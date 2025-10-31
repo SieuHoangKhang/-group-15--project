@@ -114,14 +114,13 @@ exports.me = async (req, res) => {
     if (!sub) return res.status(401).json({ message: 'Thiếu thông tin người dùng trong token' });
     const user = await User.findById(sub);
     if (!user) return res.status(404).json({ message: 'Không tìm thấy người dùng' });
-  const { id, name, email, phone, address, avatarUrl, role } = user.toJSON();
-  return res.json({ id, name, email, phone, address, avatarUrl, role });
+    const { id, name, email, phone, address, avatarUrl, role } = user.toJSON();
+    return res.json({ id, name, email, phone, address, avatarUrl, role });
   } catch (err) {
     console.error('Me error:', err);
     return res.status(500).json({ message: 'Lỗi máy chủ' });
   }
 };
-
 // POST /auth/forgot-password
 exports.forgotPassword = async (req, res) => {
   try {

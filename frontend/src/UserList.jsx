@@ -285,48 +285,48 @@ function UserList() {
         </DialogActions>
       </Dialog>
 
-        <Dialog
-          open={edit.open}
-          onClose={closeEdit}
-          fullWidth
-          maxWidth="sm"
-          PaperProps={{
-            sx: {
-              bgcolor: (theme) => theme.palette.background.paper,
-              color: (theme) => theme.palette.text.primary,
-              boxShadow: 12,
-              borderRadius: 2,
-              p: 1,
-            }
-          }}
-          BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' } }}
-        >
-          <DialogTitle sx={{ fontWeight: 700 }}>Sửa thông tin user</DialogTitle>
-          <DialogContent sx={{ pt: 1 }}>
-            <Typography variant="body2" color="text.primary">Chỉnh sửa tên và email của user.</Typography>
-            <TextField
-              margin="dense"
-              label="Tên"
-              fullWidth
-              value={edit.name}
-              onChange={(e) => setEdit((s) => ({ ...s, name: e.target.value }))}
-              sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1, mt: 1 }}
-            />
-            <TextField
-              margin="dense"
-              label="Email"
-              type="email"
-              fullWidth
-              value={edit.email}
-              onChange={(e) => setEdit((s) => ({ ...s, email: e.target.value }))}
-              sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1, mt: 1 }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={closeEdit}>Huỷ</Button>
-            <Button onClick={handleUpdate} variant="contained">Lưu</Button>
-          </DialogActions>
-        </Dialog>
+      <Dialog
+        open={edit.open}
+        onClose={closeEdit}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            bgcolor: (theme) => theme.palette.background.paper,
+            color: (theme) => theme.palette.text.primary,
+            boxShadow: 12,
+            borderRadius: 2,
+            p: 1,
+          }
+        }}
+        BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>Sửa thông tin user</DialogTitle>
+        <DialogContent sx={{ pt: 1 }}>
+          <Typography variant="body2" color="text.primary">Chỉnh sửa tên và email của user.</Typography>
+          <TextField
+            margin="dense"
+            label="Tên"
+            fullWidth
+            value={edit.name}
+            onChange={(e) => setEdit((s) => ({ ...s, name: e.target.value }))}
+            sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1, mt: 1 }}
+          />
+          <TextField
+            margin="dense"
+            label="Email"
+            type="email"
+            fullWidth
+            value={edit.email}
+            onChange={(e) => setEdit((s) => ({ ...s, email: e.target.value }))}
+            sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1, mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeEdit}>Huỷ</Button>
+          <Button onClick={handleUpdate} variant="contained">Lưu</Button>
+        </DialogActions>
+      </Dialog>
     </GlassCard>
   );
 }

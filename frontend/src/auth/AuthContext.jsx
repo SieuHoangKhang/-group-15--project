@@ -58,7 +58,6 @@ export function AuthProvider({ children }) {
   const updateProfile = useCallback(async ({ name, email, phone, address }) => {
     const res = await api.put('/auth/profile', { name, email, phone, address });
     const updated = res.data;
-    // update local user copy
     // merge with existing user to avoid dropping fields like `role` that the profile endpoint may not return
     const merged = Object.assign({}, user || {}, updated);
     saveAuth(token, merged);
