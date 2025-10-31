@@ -59,8 +59,8 @@ function HeaderAuth() {
 function AdminArea() {
   const { user } = useAuth();
   if (!user) return <Typography variant="body1" color="text.secondary">Vui lòng đăng nhập để xem trang quản trị.</Typography>;
-  // Accept role checks case-insensitively to avoid issues with 'Admin' vs 'admin'
-  if (String(user.role || '').toLowerCase() !== 'admin') return <Typography variant="body1" color="error">Bạn không có quyền truy cập trang quản trị.</Typography>;
+  // Any authenticated user may VIEW the user list (read-only).
+  // Write operations (add/edit/delete) are still controlled by UI + server-side RBAC.
   return <UserList />;
 }
 
