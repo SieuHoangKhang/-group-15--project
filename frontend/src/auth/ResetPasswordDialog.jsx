@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField, Typography } from '@mui/material';
 import api from '../api';
 import { useToast } from '../ui/ToastProvider';
 
@@ -23,12 +23,28 @@ export default function ResetPasswordDialog({ open, onClose }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Đổi mật khẩu bằng token</DialogTitle>
-      <DialogContent>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      PaperProps={{
+        sx: {
+          bgcolor: (theme) => theme.palette.background.paper,
+          color: (theme) => theme.palette.text.primary,
+          boxShadow: 12,
+          borderRadius: 2,
+          p: 1,
+        }
+      }}
+      BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' } }}
+    >
+      <DialogTitle sx={{ fontWeight: 700 }}>Đổi mật khẩu bằng token</DialogTitle>
+      <DialogContent sx={{ pt: 0 }}>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField label="Token" value={token} onChange={(e) => setToken(e.target.value)} fullWidth />
-          <TextField label="Mật khẩu mới" type="password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth />
+          <Typography variant="body2" color="text.primary">Nhập token bạn nhận được trong email và mật khẩu mới.</Typography>
+          <TextField label="Token" value={token} onChange={(e) => setToken(e.target.value)} fullWidth sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1 }} />
+          <TextField label="Mật khẩu mới" type="password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1 }} />
         </Stack>
       </DialogContent>
       <DialogActions>

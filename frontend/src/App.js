@@ -16,6 +16,8 @@ import ProfileForm from "./auth/ProfileForm";
 import LoginPage from "./auth/LoginPage";
 import SignupPage from "./auth/SignupPage";
 import { UsersProvider } from "./UsersContext";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ResetPassword from './auth/ResetPassword';
 
 const theme = createTheme({
   palette: {
@@ -149,7 +151,12 @@ function App() {
         }}
       />
       <Container maxWidth="lg">
-        <AuthContent />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/*" element={<AuthContent />} />
+          </Routes>
+        </BrowserRouter>
       </Container>
       </UsersProvider>
       </AuthProvider>

@@ -23,16 +23,41 @@ export default function ForgotPasswordDialog({ open, onClose }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Quên mật khẩu</DialogTitle>
-      <DialogContent>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      // Make the dialog paper more opaque and with stronger contrast so text is readable
+      PaperProps={{
+        sx: {
+          bgcolor: (theme) => theme.palette.background.paper,
+          color: (theme) => theme.palette.text.primary,
+          boxShadow: 12,
+          borderRadius: 2,
+          p: 1,
+        }
+      }}
+      BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' } }}
+    >
+      <DialogTitle sx={{ fontWeight: 700 }}>Quên mật khẩu</DialogTitle>
+      <DialogContent sx={{ pt: 0 }}>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <Typography variant="body2">Nhập email để nhận token đặt lại (trong demo token sẽ được trả về màn hình).</Typography>
-          <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
+          <Typography variant="body2" color="text.primary">
+            Nhập email để nhận token đặt lại. Token sẽ có hiệu lực trong 15 phút.
+          </Typography>
+          <TextField
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            fullWidth
+            sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1 }}
+          />
           {token && (
             <div>
               <Typography variant="subtitle2">Token (dùng để reset trong demo):</Typography>
-              <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>{token}</Typography>
+              <Typography variant="body2" sx={{ wordBreak: 'break-all', background: 'rgba(0,0,0,0.04)', p: 1, borderRadius: 1 }}>{token}</Typography>
             </div>
           )}
         </Stack>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField, Avatar, Box } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Stack, TextField, Avatar, Box, Typography } from '@mui/material';
 import { useAuth } from './AuthContext';
 import { useToast } from '../ui/ToastProvider';
 
@@ -68,12 +68,28 @@ export default function ProfileForm({ open, onClose }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogTitle>Hồ sơ của bạn</DialogTitle>
-      <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      PaperProps={{
+        sx: {
+          bgcolor: (theme) => theme.palette.background.paper,
+          color: (theme) => theme.palette.text.primary,
+          boxShadow: 12,
+          borderRadius: 2,
+          p: 1,
+        }
+      }}
+      BackdropProps={{ sx: { backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)' } }}
+    >
+      <DialogTitle sx={{ fontWeight: 700 }}>Hồ sơ của bạn</DialogTitle>
+      <DialogContent sx={{ pt: 0 }}>
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          <Typography variant="body2" color="text.primary">Cập nhật thông tin hồ sơ và ảnh đại diện của bạn.</Typography>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Avatar src={avatarPreview || ''} sx={{ width: 64, height: 64 }} />
+            <Avatar src={avatarPreview || ''} sx={{ width: 64, height: 64, border: '2px solid rgba(255,255,255,0.06)', bgcolor: (theme) => theme.palette.background.default }} />
             <div>
               <input
                 id="avatar-file"
@@ -85,10 +101,10 @@ export default function ProfileForm({ open, onClose }) {
               <Button size="small" variant="outlined" onClick={handleUploadAvatar} disabled={loading}>Tải lên ảnh</Button>
             </div>
           </Box>
-          <TextField label="Họ tên" value={name} onChange={(e) => setName(e.target.value)} fullWidth />
-          <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
-          <TextField label="Số điện thoại" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />
-          <TextField label="Địa chỉ" value={address} onChange={(e) => setAddress(e.target.value)} fullWidth />
+          <TextField label="Họ tên" value={name} onChange={(e) => setName(e.target.value)} fullWidth sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1 }} />
+          <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1 }} />
+          <TextField label="Số điện thoại" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1 }} />
+          <TextField label="Địa chỉ" value={address} onChange={(e) => setAddress(e.target.value)} fullWidth sx={{ bgcolor: (theme) => theme.palette.background.default, borderRadius: 1 }} />
         </Stack>
       </DialogContent>
       <DialogActions>

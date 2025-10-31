@@ -45,7 +45,8 @@ const UserSchema = new mongoose.Schema({
         default: null,
         select: false,
     },
-    resetExpires: {
+    // New name for expiry field used by controllers: resetTokenExpire
+    resetTokenExpire: {
         type: Date,
         default: null,
     },

@@ -1,0 +1,4 @@
+{
+  "message": "Unable to send email. Your SMTP account is not yet activated. Please contact us at contact@brevo.com to request activation",
+  "code": "permission_denied"
+}

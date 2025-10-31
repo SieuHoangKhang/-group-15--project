@@ -4,6 +4,7 @@ const User = require('../models/User');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { sendResetPasswordEmail } = require('../services/emailService');
 // Cloudinary optional integration
 let cloudinary;
 try {
@@ -129,47 +130,37 @@ exports.forgotPassword = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) return res.status(200).json({ message: 'Nếu email tồn tại, token reset sẽ được gửi.' });
 
-    const token = crypto.randomBytes(20).toString('hex');
-    user.resetToken = token;
-    user.resetExpires = Date.now() + 3600 * 1000; // 1 hour
+    // create token and expiry (15 minutes)
+    const token = crypto.randomBytes(32).toString('hex');
+    // store only the SHA-256 hash in DB for security
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    user.resetToken = tokenHash;
+    user.resetTokenExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
     await user.save();
 
-    // If Brevo (Sendinblue) is configured via BREVO_API_KEY, try to send the reset email.
-    const BREVO_API_KEY = process.env.BREVO_API_KEY;
-    const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const FROM_EMAIL = process.env.BREVO_FROM_EMAIL || process.env.EMAIL_FROM || 'no-reply@example.com';
-    const FROM_NAME = process.env.BREVO_FROM_NAME || 'No Reply';
+    // Development helper disabled for production by default.
+    // We keep this code removed to avoid writing plain tokens to disk.
+    // If you really need to enable storing the plain token for local debugging,
+    // re-enable by setting DEV_SAVE_RESET_TOKEN and uncommenting the write logic here.
 
-    if (brevoClient && BREVO_API_KEY) {
+    // try to send email via service with the PLAIN token (to deliver in link)
+    try {
+      await sendResetPasswordEmail(user.email, token);
+      return res.json({ message: 'Reset token đã được gửi qua email nếu email tồn tại.' });
+    } catch (err) {
+      // Log the error for diagnostics but do NOT return the plain token to the client.
+      console.error('sendResetPasswordEmail failed:', err && err.body ? err.body : err);
+      // Save last error to uploads for operator inspection (already present elsewhere)
       try {
-        // configure API key on the SDK ApiClient
-        const SibApiV3Sdk = require('@sendinblue/client');
-        SibApiV3Sdk.ApiClient.instance.authentications['api-key'].apiKey = BREVO_API_KEY;
-
-        const resetLink = `${FRONTEND_URL.replace(/\/$/, '')}/auth/reset-password?token=${token}`;
-        const subject = 'Yêu cầu đặt lại mật khẩu';
-        const htmlContent = `<p>Xin chào ${user.name || ''},</p>
-          <p>Bạn (hoặc ai đó) đã yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Nhấn vào liên kết bên dưới để đặt lại mật khẩu (hết hạn sau 1 giờ):</p>
-          <p><a href="${resetLink}">${resetLink}</a></p>
-          <p>Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>`;
-
-        const sendSmtpEmail = {
-          sender: { name: FROM_NAME, email: FROM_EMAIL },
-          to: [{ email: user.email, name: user.name || '' }],
-          subject,
-          htmlContent,
-        };
-
-        await brevoClient.sendTransacEmail(sendSmtpEmail);
-        return res.json({ message: 'Reset token đã được gửi qua email nếu email tồn tại.' });
-      } catch (err) {
-        console.error('Brevo send failed:', err && err.body ? err.body : err);
-        // fallthrough to return token in response for fallback/testing
+        const uploadsDir = path.join(__dirname, '..', 'uploads');
+        await fs.promises.mkdir(uploadsDir, { recursive: true });
+        const errPath = path.join(uploadsDir, 'brevo-last-error.txt');
+        await fs.promises.writeFile(errPath, JSON.stringify(err && err.body ? err.body : err, null, 2), { encoding: 'utf8' });
+      } catch (e) {
+        console.error('Failed to write brevo-last-error.txt:', e && e.message ? e.message : e);
       }
+      return res.json({ message: 'Nếu email tồn tại, token reset sẽ được gửi.' });
     }
-
-    // Fallback: return token in response (useful for testing when email not configured)
-    return res.json({ message: 'Reset token đã được tạo (trong thực tế sẽ gửi qua email).', token });
   } catch (err) {
     console.error('forgotPassword error:', err);
     return res.status(500).json({ message: 'Lỗi máy chủ' });
@@ -181,14 +172,16 @@ exports.resetPassword = async (req, res) => {
   try {
     const { token, password } = req.body || {};
     if (!token || !password) return res.status(400).json({ message: 'Yêu cầu token và mật khẩu mới' });
-    const user = await User.findOne({ resetToken: token, resetExpires: { $gt: Date.now() } }).select('+password +resetToken +resetExpires');
+  // hash the incoming token and look up the user by the hash
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const user = await User.findOne({ resetToken: tokenHash, resetTokenExpire: { $gt: Date.now() } }).select('+password +resetToken +resetTokenExpire');
     if (!user) return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
 
     const bcrypt = require('bcryptjs');
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(password, salt);
     user.resetToken = null;
-    user.resetExpires = null;
+    user.resetTokenExpire = null;
     await user.save();
     return res.json({ message: 'Đã đặt lại mật khẩu thành công' });
   } catch (err) {

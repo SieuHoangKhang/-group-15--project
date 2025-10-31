@@ -48,4 +48,20 @@ router.get('/debug/status', (req, res) => {
   }
 });
 
+// GET /api/debug/last-reset-token
+// Development helper: return the last plain reset token saved to uploads/last-reset-token.txt
+router.get('/debug/last-reset-token', async (req, res) => {
+  try {
+    if (process.env.DEV_SAVE_RESET_TOKEN !== 'true') {
+      return res.status(403).json({ ok: false, message: 'Not enabled' });
+    }
+    const filePath = path.join(__dirname, '..', 'uploads', 'last-reset-token.txt');
+    if (!fs.existsSync(filePath)) return res.status(404).json({ ok: false, message: 'No token saved' });
+    const token = fs.readFileSync(filePath, 'utf8');
+    return res.json({ ok: true, token });
+  } catch (err) {
+    return res.status(500).json({ ok: false, message: 'Failed to read token' });
+  }
+});
+
 module.exports = router;

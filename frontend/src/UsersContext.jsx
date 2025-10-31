@@ -16,6 +16,16 @@ export function UsersProvider({ children }) {
         setUsers([]);
         return;
       }
+      // Only fetch user list for admin accounts. Non-admin users should not call /api/users
+      // (backend requires admin via RBAC and will return 403). This avoids noisy 403 errors.
+      let storedUser = null;
+      try { storedUser = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null; } catch (_) { storedUser = null; }
+      const isAdmin = storedUser && String(storedUser.role || '').toLowerCase() === 'admin';
+      if (!isAdmin) {
+        // clear list for non-admins and avoid calling the protected endpoint
+        setUsers([]);
+        return;
+      }
       setLoading(true);
       setError('');
       const res = await api.get('/users');

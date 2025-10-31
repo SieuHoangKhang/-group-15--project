@@ -34,8 +34,20 @@ export function AuthProvider({ children }) {
   const login = useCallback(async ({ email, password }) => {
     const res = await api.post('/auth/login', { email, password });
     const { token: t, user: u } = res.data || {};
+    // Save basic auth first so api interceptor has token available
     saveAuth(t, u);
-    return u;
+    // Immediately fetch /auth/me to get the latest profile fields (avatarUrl, phone, etc.)
+    // This ensures that after logout/login the saved user contains avatarUrl persisted on server.
+    try {
+      const me = await api.get('/auth/me');
+      const full = me.data || {};
+      const merged = Object.assign({}, u || {}, full);
+      saveAuth(t, merged);
+      return merged;
+    } catch (err) {
+      // If /auth/me fails for any reason, return the original user object
+      return u;
+    }
   }, [saveAuth]);
 
   const logout = useCallback(async () => {
